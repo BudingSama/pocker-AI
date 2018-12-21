@@ -12,6 +12,7 @@ class Pocker extends React.PureComponent{
             pockerList
         })
         x.bombType(pockerList[0])
+        // x.bombType([31,33,41,44,51,52,61,62,101,102,141])
     }
     render(){
         const _this = this;

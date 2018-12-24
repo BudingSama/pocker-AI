@@ -56,8 +56,56 @@ const AIfunc = (arr) => {
 }
 */
 const checkPockerType = (arr) => {
+
 }
 
+//牌面权重分析[叫分] 0玩家 1左人机 2右人机 3底牌
+const setPockerPoint = (data) => {
+  //检索炸弹
+  let point = 0;
+  let totalData;
+  const arr = data.sort((a,b)=>a-b);
+  const bombArr = [];
+  for(let i = 0; i < arr.length - 1; i ++){
+      const item = [arr[i]];
+      for(let j = i+1; j < arr.length; j ++){
+          if(Math.floor(arr[i]/10) === Math.floor(arr[j]/10) && arr[i] && arr[j]){
+              item.push(arr[j]);
+          }
+      }
+      if(item.length >= 4){
+          bombArr.push(item);
+      }
+  }
+  point += bombArr.length * 5;
+  //计算得分
+  arr.forEach(ele => {
+    if(ele === 161){
+      //小王
+      point +=3;
+    }else if(ele === 162){
+      //大王
+      point +=4;
+    }else if(Math.floor(ele/10) === 15){
+      //2
+      point +=2;
+    }
+  })
+  if(point>=7){
+    //三分
+    totalData = 3
+  }else if(point>=5){
+    //两分
+    totalData = 2
+  }else if(point>=3){
+    //一分
+    totalData = 1
+  }else{
+    //不叫
+    totalData = 0
+  }
+  return totalData
+}
 //单顺
 const dsType = (obj) => {
     //23456 34567 45678 56789 678910 78910J 10JQKA
@@ -372,8 +420,8 @@ const startPocker = (obj) => {
       for(let i = 0; i < obj[key].length; i ++){
         if(obj[key][i] instanceof Array){
           for(let j = 0; j < obj[key][i].length; j ++){
-            if(obj[key][i][j] === minData){
-              //包含最小牌的组合
+            if(obj[key][i][j] === minData && key!=='bomb'){
+              //包含最小牌的组合 排除炸弹
               pushPocker.push(obj[key][i])
               obj[key].splice(i,1);
               if(key === 'sd'){
@@ -430,5 +478,6 @@ export default {
     refreshPocker,
     dsType,
     bombType,
-    startPocker
+    startPocker,
+    setPockerPoint
 }

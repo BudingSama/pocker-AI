@@ -1,8 +1,16 @@
+*{
+  margin: 0;
+  padding: 0;
+}
 .wrap{
   width:100%;
   height:100%;
   position: relative;
   height: 550px;
+  section{
+    text-align: center;
+    font-size: 13px;
+  }
   section:nth-child(3){
       position: absolute;
       left: 100px;
@@ -23,7 +31,7 @@
       right: 0;
       margin: 0 auto;
       height: 100px;
-      width:700px;
+      width:800px;
       bottom: 30px;
   }
   section:nth-child(4){
@@ -36,4 +44,30 @@
       width:200px;
       bottom: 30px;
   }
+}
+.pointStart{
+  list-style: none;
+  position: absolute;
+  text-align: center;
+  left: 0;
+  right: 0;
+  width: 300px;
+  top: 350px;
+  margin: 0 auto;
+  li{
+    float: left;
+    padding: 0 10px;
+    border:1px solid black;
+    margin: 0 4px;
+  }
+}
+.AIpointA{
+  position: absolute;
+  left: 180px;
+  top: 200px;
+}
+.AIpointB{
+  position: absolute;
+  right: 210px;
+  top: 200px;
 }

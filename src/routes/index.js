@@ -4,15 +4,60 @@ import Styles from './index.less';
 class Pocker extends React.PureComponent{
     state = {
         pockerList:null,
+        startPoint:false
     }
     UNSAFE_componentWillMount(){
+        //初始化牌组
         let arr = x.refreshPocker(x.createPockerArray())
+        //发牌
         const pockerList = arr.map(ele => ele.sort((a,b)=>b-a));
         this.setState({
             pockerList
         })
+        //随机叫分顺序
+        const sort = Math.floor(Math.random()*3);
+        const AIa = x.setPockerPoint(pockerList[1]);
+        const Aib = x.setPockerPoint(pockerList[2]);
+        switch(sort){
+          case 0:
+          //左1->分析权重
+          if(AIa === 3){
+            //地主
+            this.setState({
+              startPoint:'start'
+            })
+          }
+          break;
+          case 1:
+          //玩家->等待叫分
+          break;
+          case 2:
+          //右1->分析权重
+          break;
+          default:
+        }
         x.bombType(pockerList[0])
-        // x.bombType([31,33,41,44,51,52,61,62,101,102,141])
+    }
+    pointStart = (e) => {
+      let text;
+      switch(e.currentTarget.value){
+        case 0:
+        text = '不叫';
+        break;
+        case 1:
+        text = '1分'
+        break;
+        case 2:
+        text = '2分'
+        break;
+        case 3:
+        text = 'start'
+        break;
+        default:
+      }
+      this.setState({
+        startPoint:text
+      })
     }
     render(){
         const _this = this;
@@ -69,9 +114,14 @@ class Pocker extends React.PureComponent{
                             break;
                             default:
                         }
+                        //0玩家 1左人机 2右人机 3底牌
                         return index === 0 || index === 3 ?
+                        index === 3 && this.state.startPoint !== 'start' ?
                         (
-                            <span key={ind}> {color}{data} </span>
+                          <span key={ind}> ？ </span>
+                        ):
+                        (
+                          <span key={ind}> {color}{data} </span>
                         )
                         :
                         (
@@ -81,6 +131,17 @@ class Pocker extends React.PureComponent{
                 }
             </section>)
         }
+        <div className={Styles.AIpointA}>{this.state.AIpointA}</div>
+        <div className={Styles.AIpointB}>{this.state.AIpointB}</div>
+        {!this.state.startPoint?
+        <ul className={Styles.pointStart}>
+          <li value="3" onClick={this.pointStart}>3分</li>
+          <li value="2" onClick={this.pointStart}>2分</li>
+          <li value="1" onClick={this.pointStart}>1分</li>
+          <li value="0" onClick={this.pointStart}>不叫</li>
+        </ul>:this.state.startPoint !=='start'?
+        <ul className={Styles.pointStart}>{this.state.startPoint}</ul>
+      :''}
         </div>
         )
     }

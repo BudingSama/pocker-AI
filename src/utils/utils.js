@@ -59,7 +59,7 @@ const checkPockerType = (arr) => {
 
 }
 
-//牌面权重分析[叫分] 0玩家 1左人机 2右人机 3底牌
+//牌面权重分析[叫分] 0玩家 2左人机 1右人机 3底牌
 const setPockerPoint = (data) => {
   //检索炸弹
   let point = 0;

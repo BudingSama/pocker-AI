@@ -7,51 +7,32 @@ class Pocker extends React.PureComponent{
         startPoint:false,
         AIpointA:null,
         AIpointB:null,
-        startQuery:null
+        startQuery:null,
+        AIA:null,
+        AIB:null,
+        player:null
     }
     initPocker = async () => {
-      console.log(123)
-      //初始化牌组
-      const _this = this;
       //初始化牌组
       let arr = x.refreshPocker(x.createPockerArray())
       //发牌
       const pockerList = arr.map(ele => ele.sort((a,b)=>b-a));
       this.setState({
-          pockerList
+          pockerList,
+          AIpointA:null,
+          AIpointB:null,
+          startQuery:null,
+          startPoint:null,
       })
       //随机叫分顺序
       const sort = Math.floor(Math.random()*3);
       this.setState({
         startQuery:sort
       })
-      const AIpointA = x.setPockerPoint(pockerList[2]);
-      const AIpointB = x.setPockerPoint(pockerList[1]);
       switch(sort){
         case 0:
         //左1->分析权重
         this.loopPoint(2);
-        // if(AIpointA === 3){
-        //   //地主
-        //   setTimeout(()=>{
-        //     const computedList = []
-        //     Object.assign(computedList,pockerList);
-        //     computedList[2] = computedList[2].concat(computedList[3]);
-        //     _this.setState({
-        //       startPoint:'start',
-        //       pockerList:computedList
-        //     })
-        //   },1000)
-        // }else{
-        //   //非地主
-        //   //下轮叫分
-        //   setTimeout(() => {
-        //     _this.setState({
-        //       AIpointA:!AIpointA?'不叫':`${AIpointA}分`,
-        //       startQuery:1
-        //     })
-        //   }, 1000);
-        // }
         break;
         case 1:
         //玩家->等待叫分
@@ -59,62 +40,15 @@ class Pocker extends React.PureComponent{
         case 2:
         //右1->分析权重
         this.loopPoint(1);
-        if(this.state.AIpointA){
-          //全部叫分完毕
-        }
-        // if(AIpointB === 3){
-        //   //地主
-        //   setTimeout(() => {
-        //     const computedList = []
-        //     Object.assign(computedList,pockerList);
-        //     computedList[1] = computedList[1].concat(computedList[3]);
-        //     _this.setState({
-        //       startPoint:'start',
-        //       pockerList:computedList
-        //     })
-        //   }, 1000);
-        // }else{
-        //   //非地主
-        //   //下轮叫分
-        //   setTimeout(() => {
-        //     _this.setState({
-        //       AIpointB:!AIpointB?'不叫':`${AIpointB}分`,
-        //       startQuery:0,
-        //     })
-        //     //左1->分析权重
-        //     if(AIpointA === 3){
-        //       //地主
-        //       setTimeout(() => {
-        //         const computedList = []
-        //         Object.assign(computedList,pockerList);
-        //         computedList[2] = computedList[2].concat(computedList[3]);
-        //         _this.setState({
-        //           startPoint:'start',
-        //           pockerList:computedList
-        //         })
-        //       }, 1000);
-        //     }else{
-        //       //非地主
-        //       //下轮叫分
-        //       setTimeout(() => {
-        //         _this.setState({
-        //           AIpointA:!AIpointA?'不叫':`${AIpointA}分`,
-        //           startQuery:1
-        //         })
-        //       }, 1000);
-        //     }
-        //   }, 1000);
-        // }
         break;
         default:
       }
-      x.bombType(pockerList[0])
     }
     UNSAFE_componentWillMount = async () => {
       this.initPocker()
     }
     getMax = () => {
-      console.log(666)
+      const _this = this;
       const { AIpointA, AIpointB, startPoint } = this.state;
       const a = AIpointA === '不叫' ? -1 : AIpointA.substr(0,1) * 1;
       const b = AIpointB === '不叫' ? -1 : AIpointB.substr(0,1) * 1;
@@ -131,17 +65,28 @@ class Pocker extends React.PureComponent{
         max = 0;
       }else{
         //洗牌
-        this.initPocker()
+        setTimeout(() => {
+          _this.initPocker();
+        }, 1000);
+        return false;
       }
       const computedList = []
       Object.assign(computedList,this.state.pockerList);
       computedList[max] = computedList[max].concat(computedList[3]);
       this.setState({
-        pockerList:computedList
+        pockerList:computedList,
+        AIpointA:null,
+        AIpointB:null,
+        startPoint:'start',
       })
+      if(max!==0){
+        //AI
+        setTimeout(() => {
+          x.checkPockerType(_this.state.pockerList[max],max)
+        }, 1000);
+      }
     }
     loopPoint = (player) => {
-      console.log(player)
       const _this = this;
       setTimeout(() => {
         const AIpoint = x.setPockerPoint(this.state.pockerList[player]);
@@ -156,6 +101,19 @@ class Pocker extends React.PureComponent{
             AIpointA:null,
             AIpointB:null
           })
+          setTimeout(() => {
+            const data = x.checkPockerType(_this.state.pockerList[player],player);
+            console.log(data)
+            if(player === 2){
+              //玩家出牌
+              alert('玩家出牌')
+            }else{
+              //左1出牌
+              setTimeout(() => {
+                x.checkPockerType(_this.state.pockerList[2],2)
+              }, 1000);
+            }
+          }, 1000);
         }else{
           //非地主
           //下轮叫分
@@ -169,6 +127,9 @@ class Pocker extends React.PureComponent{
               })
             }else{
               //结束叫分
+              setTimeout(() => {
+                _this.getMax()
+              }, 1000);
             }
           }else{
             _this.setState({
@@ -176,6 +137,11 @@ class Pocker extends React.PureComponent{
             })
             if(!_this.state.AIpointA){
               _this.loopPoint(2);
+            }else{
+              //结束叫分
+              setTimeout(() => {
+                _this.getMax()
+              }, 1000);
             }
           }
         }
@@ -210,6 +176,11 @@ class Pocker extends React.PureComponent{
         if(!this.state.AIpointB){
           //继续叫分
           _this.loopPoint(1)
+        }else{
+          //结束叫分
+          setTimeout(() => {
+            _this.getMax()
+          }, 1000);
         }
       }
       this.setState({
@@ -289,8 +260,12 @@ class Pocker extends React.PureComponent{
                 }
             </section>)
         }
+        {/* 叫分区域 */}
         <div className={Styles.AIpointA}>{this.state.AIpointA}</div>
         <div className={Styles.AIpointB}>{this.state.AIpointB}</div>
+        {/* 显示牌区域 */}
+        <div className={Styles.AIpointA}>{this.state.AIA}</div>
+        <div className={Styles.AIpointB}>{this.state.AIB}</div>
         {!this.state.startPoint&&this.state.startQuery === 1?
         <ul className={Styles.pointStart}>
           <li value="3" onClick={this.pointStart}>3分</li>

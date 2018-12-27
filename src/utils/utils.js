@@ -1,7 +1,5 @@
-import { number, object } from "prop-types";
-
 //created by buding 2018.12.18
-
+let AIA,AIB;
 //牌组
 const createPockerArray = () => {
     //除10取整为牌面大小 取余为花色{1：红桃2：方片3：黑桃4：梅花}
@@ -55,8 +53,8 @@ const AIfunc = (arr) => {
   other:散牌/未分配完成牌组
 }
 */
-const checkPockerType = (arr) => {
-
+const checkPockerType = (arr,player) => {
+  bombType(arr.sort((a,b)=>b-a),player);
 }
 
 //牌面权重分析[叫分] 0玩家 2左人机 1右人机 3底牌
@@ -352,7 +350,7 @@ const stType = (obj) => {
 }
 
 //炸弹
-const bombType = (data) => {
+const bombType = (data,player) => {
     //检索火箭
     const rocketArr = [];
     const arr = [];
@@ -404,7 +402,8 @@ const bombType = (data) => {
     const totalData = {
         bomb:bombArr,
         other,
-        currentData
+        currentData,
+        player,
     }
     //检索三顺
     stType(totalData)
@@ -414,6 +413,7 @@ const bombType = (data) => {
 //出牌顺序 单牌、对子、双顺、单顺、三顺、三条
 const startPocker = (obj) => {
   const minData = obj.currentData[obj.currentData.length - 1];
+  console.log('目标AI最小牌：'+minData)
   const pushPocker = [];
   for(const key in obj){
     if(obj[key].length && key !=='currentData'){
@@ -422,7 +422,7 @@ const startPocker = (obj) => {
           for(let j = 0; j < obj[key][i].length; j ++){
             if(obj[key][i][j] === minData && key!=='bomb'){
               //包含最小牌的组合 排除炸弹
-              pushPocker.push(obj[key][i])
+              pushPocker.push(obj[key][i].join(''))
               obj[key].splice(i,1);
               if(key === 'sd'){
                 //三条->检测单牌和单对
@@ -433,7 +433,7 @@ const startPocker = (obj) => {
                   obj['other'].splice(0,1);
                 }else if(obj['dz'].length && Math.floor(obj['dz'][0][0]/10)!==15){
                   //检测单对 排除对2
-                  pushPocker.push(obj['dz'][0])
+                  pushPocker.push(obj['dz'][0].join(''))
                   obj['dz'].splice(0,1);
                 }
               }else if(key === 'ss'){
@@ -442,13 +442,13 @@ const startPocker = (obj) => {
                 if(obj['other'].length>=num && Math.floor(obj['other'][num-1]/10)!==15 && Math.floor(obj['other'][num-1]/10)!==16){
                   //存在多张单牌
                   for(let i = 0; i < num; i ++){
-                    pushPocker.push(obj['other'][num-1])
+                    pushPocker.push(obj['other'][num-1].join(''))
                   }
                   obj['other'].splice(0,num);
                 }else if(obj['dz'].length>=2 && Math.floor(obj['dz'][num-1][0]/10)!==15){
                   //检测对子 排除对2
                   for(let i = 0; i < num; i ++){
-                    pushPocker.push(obj['dz'][num-1])
+                    pushPocker.push(obj['dz'][num-1].join(''))
                   }
                   obj['dz'].splice(0,num);
                 }
@@ -468,7 +468,14 @@ const startPocker = (obj) => {
       }
     }
   }
-  console.log(pushPocker)
+  if(obj.player === 2){
+    //左1
+    AIA = obj;
+  }else{
+    AIB = obj;
+  }
+  console.log()
+  return pushPocker.join('')
 }
 
 
@@ -476,8 +483,7 @@ const startPocker = (obj) => {
 export default {
     createPockerArray,
     refreshPocker,
-    dsType,
-    bombType,
+    checkPockerType,
     startPocker,
     setPockerPoint
 }

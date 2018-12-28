@@ -10,7 +10,8 @@ class Pocker extends React.PureComponent{
         startQuery:null,
         AIA:null,
         AIB:null,
-        player:null
+        player:null,
+        yourTime:false
     }
     initPocker = async () => {
       //初始化牌组
@@ -81,8 +82,23 @@ class Pocker extends React.PureComponent{
       })
       if(max!==0){
         //AI
-        setTimeout(() => {
-          x.checkPockerType(_this.state.pockerList[max],max)
+        setTimeout(async () => {
+          const data = await x.checkPockerType(_this.state.pockerList[max],max);
+          const pockerList = _this.state.pockerList;
+          pockerList[max].splice(0,data.length);
+          if(max === 2){
+            //左1
+            _this.setState({
+              AIA:data,
+              pockerList
+            })
+          }else if(max === 1){
+            //右1
+            _this.setState({
+              AIB:data,
+              pockerList
+            })
+          }
         }, 1000);
       }
     }
@@ -101,17 +117,27 @@ class Pocker extends React.PureComponent{
             AIpointA:null,
             AIpointB:null
           })
-          setTimeout(() => {
-            const data = x.checkPockerType(_this.state.pockerList[player],player);
-            console.log(data)
+          setTimeout(async () => {
+            const data = await x.checkPockerType(_this.state.pockerList[player],player);
+            const pockerList = _this.state.pockerList;
+            pockerList[player].splice(0,data.length);
             if(player === 2){
               //玩家出牌
-              alert('玩家出牌')
+              _this.setState({
+                AIA:data,
+                pockerList,
+                yourTime:true
+              })
             }else{
               //左1出牌
               setTimeout(() => {
                 x.checkPockerType(_this.state.pockerList[2],2)
+                pockerList[2].splice(0,data.length);
               }, 1000);
+              _this.setState({
+                AIB:data,
+                pockerList
+              })
             }
           }, 1000);
         }else{
@@ -275,6 +301,13 @@ class Pocker extends React.PureComponent{
         </ul>:this.state.startPoint !=='start'?
         <ul className={Styles.pointStart}>{this.state.startPoint}</ul>
       :''}
+      {/* 出牌区域 */}
+      {this.state.yourTime ?
+      <ul className={Styles.sendPocker}>
+        <li>出牌</li>
+        <li>pass</li>
+      </ul>:''
+      }
         </div>
         )
     }
